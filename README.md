@@ -1,16 +1,5 @@
 # Vue Microfrontends
 
-This is a starter-kit / example repository for people who want to have multiple vue microfrontends coexist within a single page. Each
-of the vue applications was created by Vue CLI.
-
-It uses [single-spa](https://single-spa.js.org) to pull this off, which means that you can even add React, Angular, or other frameworks as
-additional microfrontends.
-
-## An important note
-This github repository has four projects all in one repo. But when you do this yourself, **you'll want to have one git repo per
-vue application**. The root-html-file project should also be in its own repo. This is what lets different teams and developers be in
-charge of different microfrontends.
-
 ## Local development -- one app at a time
 With single-spa, it is preferred to run `npm run serve` in only one single-spa application at a time, while using a deployed
 version of the other applications. This makes for an awesome developer experience where you can boot up just one
