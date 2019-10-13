@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Coexisting Vue Microfrontends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="importmap-type" content="systemjs-importmap">
+    <script type="systemjs-importmap">
+      {
+        "imports": {
+          "navbar": "http://localhost:8080/app.js",
+          "app1": "http://localhost:8081/app.js",
+          "app2": "http://localhost:8082/app.js",
+          "vue": "https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js",
+          "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@3.0.7/dist/vue-router.min.js"
+        }
+      }
+    </script>
+    <script src="https://unpkg.com/import-map-overrides@1.7.2/dist/import-map-overrides.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.1.1/system.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.1.1/extras/amd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.1.1/extras/named-exports.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.1.1/extras/named-register.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.1.1/extras/use-default.min.js"></script>
+
+</head>
+<body>
+<div id="app"></div>
+<script>
+    (function () {
+        Promise.all([System.import('vue'), System.import('vue-router')]).then(function (modules) {
+            var Vue = modules[0];
+            var VueRouter = modules[1];
+
+            Vue.use(VueRouter);
+
+            Promise.all(['navbar', 'app1', 'app2'].map(item => System.import(item))).then(modules => {
+
+                window.init.router.addRoutes([{
+                    path: '/app2',
+                    component: Vue.extend({render: window.two.render}),
+                    children: window.two.router.options.routes.map(item => {
+                        let path = item.path.replace(/^\/app2\/?/, '') || '/';
+                        item.path = /^\//.test(path) ? path : ('/' + path);
+                        return item;
+                    })
+                }, {
+                    path: '/app1',
+                    component: Vue.extend({render: window.one.render}),
+                    children: window.one.router.options.routes.map(item => {
+                        let path = item.path.replace(/^\/app1\/?/, '') || '/';
+                        item.path = /^\//.test(path) ? path : ('/' + path);
+                        return item;
+                    })
+                }]);
+
+
+                let s = new Vue(window.init);
+
+                s.$mount('#app');
+            });
+        })
+    })()
+</script>
+<import-map-overrides-full show-when-local-storage="overrides-ui"></import-map-overrides-full>
+</body>
+</html>
